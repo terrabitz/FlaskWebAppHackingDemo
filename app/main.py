@@ -5,6 +5,7 @@ from flask_security import Security, SQLAlchemyUserDatastore, UserMixin, RoleMix
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'Keep it secret, keep it safe'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/test.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 app.config['EXPLAIN_TEMPLATE_LOADING'] = True
 app.config['DEBUG'] = True
 db = SQLAlchemy(app)

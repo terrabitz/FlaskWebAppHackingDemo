@@ -32,4 +32,8 @@ def create_user():
                 print('Exiting...')
                 exit(0)
         else:
-            create_and_add_user()
+            create_and_add_user(email)
+
+
+if __name__ == '__main__':
+    manager.run()
