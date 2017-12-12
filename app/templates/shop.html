@@ -1,0 +1,12 @@
+{% extends '_page.html' %}
+{% from "components/forms.html" import form, input, button, error_flash %}
+
+{% block page_body %}
+    <p>Dell Laptop</p>
+    <img src="https://s18.postimg.org/pjs7oy7w9/index.jpg">
+    {{ form(method="POST", fields=[
+        input(name="quantity", placeholder="Quantity"),
+        input(name="cost", value='300.00', disabled=True),
+        button(text="Order", type="submit", style_class="btn-primary")
+    ]) }}
+{% endblock %}

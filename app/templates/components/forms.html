@@ -1,31 +1,32 @@
-{% macro input(name, label, placeholder="", type="text") -%}
-    <label for="{{ name }}">{{ label }}</label>
-    <input type="{{ type }}" class="form-control" name="{{ name }}" id="{{ name }}" aria-describedby="name_help"
-           placeholder="{{ placeholder }}">
+{% macro input(name, label, value="", placeholder="", type="text", disabled=False) -%}
+<label for="{{ name }}">{{ label }}</label>
+<input type="{{ type }}" class="form-control" name="{{ name }}" id="{{ name }}" {% if value %}value="{{value}}" {% endif
+       %} aria-describedby="name_help"
+       placeholder="{{ placeholder }}" {% if disabled %}readonly{% endif %}>
 {%- endmacro %}
 
 {% macro button(text, name="", type="button", style_class="") %}
-    <button type="{{ type }}" class="submit btn {{ style_class }}">{{ text }}</button>
+<button type="{{ type }}" class="submit btn {{ style_class }}">{{ text }}</button>
 {%- endmacro %}
 
 {% macro textarea(name, rows=5) %}
-    <textarea class="form-control" rows={{ rows }} name={{ name }}></textarea>
+<textarea class="form-control" rows={{ rows }} name={{ name }}></textarea>
 {%- endmacro %}
 
 {% macro error_flash(error=None) %}
-    {% if error %}
-        <div class="text-danger"><p>{{ error }}</p></div>
-    {% endif %}
+{% if error %}
+<div class="text-danger"><p>{{ error }}</p></div>
+{% endif %}
 {%- endmacro %}
 
 {% macro form(fields, method="GET", action=None) %}
-    <div class="row">
-        <div class="col-md-4"></div>
-        <form class="col-md-4" method={{ method }} {% if action %}action={{ action }}{% endif %}>
-            {% for field in fields %}
-                {{ field }}
-            {% endfor %}
-        </form>
-        <div class="col-md-4"></div>
-    </div>
+<div class="row">
+    <div class="col-md-4"></div>
+    <form class="col-md-4" method={{ method }} {% if action %}action={{ action }}{% endif %}>
+        {% for field in fields %}
+        {{ field }}
+        {% endfor %}
+    </form>
+    <div class="col-md-4"></div>
+</div>
 {%- endmacro %}

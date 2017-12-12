@@ -1,0 +1,9 @@
+{% extends '_page.html' %}
+
+{% block page_body %}
+    {% if id < 5 %}
+    <p>Spider to here: <a href="{{ url_for('.spider', id=id+1) }}">Spider Page {{ str(id+1) }}</a></p>
+    {% else %}
+    <p>No more to spider...</p>
+    {% endif %}
+{% endblock %}

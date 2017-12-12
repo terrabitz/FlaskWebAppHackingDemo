@@ -1,0 +1,18 @@
+{% extends '_page.html' %}
+
+{% block page_body %}
+    <table class="table table-striped">
+        <tr>
+            <th>Item</th>
+            <th>Cost</th>
+            <th>Quantity</th>
+            <th>Total</th>
+        </tr>
+        <tr>
+            <td>Dell Laptop</td>
+            <td>{{ cost }}</td>
+            <td>{{ quantity }}</td>
+            <td>{{ cost*quantity }}</td>
+        </tr>
+    </table>
+{% endblock %}

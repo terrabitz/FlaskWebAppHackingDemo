@@ -1,5 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
-from flask_security import RoleMixin, UserMixin, SQLAlchemyUserDatastore
+from flask_security import RoleMixin, UserMixin
 
 db = SQLAlchemy()
 # Define models
@@ -23,5 +23,8 @@ class User(db.Model, UserMixin):
     roles = db.relationship('Role', secondary=roles_users,
                             backref=db.backref('users', lazy='dynamic'))
 
+class SuperSecureData(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    credit_card_number = db.Column(db.String(255), unique=True)
+    ssn = db.Column(db.String(255), unique=True)
 
-user_datastore = SQLAlchemyUserDatastore(db, User, Role)

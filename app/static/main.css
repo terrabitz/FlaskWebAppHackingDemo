@@ -1,0 +1,12 @@
+* {
+    text-align: center;
+}
+
+.card {
+    width: 20rem;
+}
+
+.reload {
+    padding-bottom: 0;
+    margin-bottom: 0;
+}

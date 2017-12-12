@@ -17,18 +17,18 @@ def create_user():
         user = user_datastore.create_user(email=email, password=password)
         super_user = prompt_bool('Should user be admin?')
         if super_user:
-            super_user_role = user_datastore.find_role('superuser')
+            super_user_role = user_datastore.find_or_create_role('superuser')
             user_datastore.add_role_to_user(user, super_user_role)
         else:
-            user_role = user_datastore.find_role('user')
+            user_role = user_datastore.find_or_create_role('user')
             user_datastore.add_role_to_user(user, user_role)
         db.session.add(user)
         db.session.commit()
-        print('New credentials are admin/{}'.format(password))
+        print('New credentials are {}/{}'.format(email, password))
 
     with app.app_context():
         email = prompt('Enter email')
-        user = user_datastore.get_user(email)
+        user = user_datastore.find_user(email=email)
         if user:
             if prompt_bool('User already exists. Override?'):
                 user_datastore.delete_user(user)
