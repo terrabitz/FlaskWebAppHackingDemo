@@ -111,7 +111,8 @@ def sqli():
     order_id = request.form.get('order_id')
     if request.method == 'POST' and order_id:
         connection = db.engine.connect()
-        rows = connection.execute('select * from orders where id = \'{}\''.format(order_id))
+        rows = connection.execute(
+            'select * from orders where id = \'{}\' and user_id={}'.format(order_id, current_user.id))
         for row in rows:
             order = {}
             for key, value in row.items():
