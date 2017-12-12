@@ -4,7 +4,7 @@ from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
 from sqlalchemy.exc import OperationalError
 
-from app.models import db, User, Role, SuperSecureData
+from app.models import db, User, Role, SuperSecureData, Orders
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'Keep it secret, keep it safe'
@@ -57,6 +57,7 @@ def init_admin_extension(app):
     admin.add_view(SecurityModelView(User, db.session))
     admin.add_view(SecurityModelView(Role, db.session))
     admin.add_view(SecurityModelView(SuperSecureData, db.session))
+    admin.add_view(SecurityModelView(Orders, db.session))
 
 
 def init_security_extension_db(app):
@@ -110,16 +111,14 @@ def sqli():
     order_id = request.form.get('order_id')
     if request.method == 'POST' and order_id:
         connection = db.engine.connect()
-        try:
-            rows = connection.execute('select * from orders where id = \'{}\''.format(order_id))
-        except OperationalError:
+        rows = connection.execute('select * from orders where id = \'{}\''.format(order_id))
+        for row in rows:
+            order = {}
+            for key, value in row.items():
+                order[key] = value
+            results.append(order)
+        if not results:
             error = 'Could not find order {}'.format(order_id)
-        else:
-            for row in rows:
-                order = {}
-                for key, value in row.items():
-                    order[key] = value
-                results.append(order)
 
     return render_template(
         'shipping_order.html',
