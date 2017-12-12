@@ -1,0 +1,31 @@
+{% extends '_page.html' %}
+{% from 'components/forms.html' import form, input, button %}
+
+{% block page_body %}
+{% if error %}
+<div class="alert alert-danger" role="alert">
+    {{ error }}
+</div>
+{% endif %}
+{{ form(method="POST", fields=[
+input(name="order_id", label="Enter your order ID", placeholder="Order ID"),
+button(text="Submit", type="submit", style_class="btn-primary")
+])
+}}
+{% if results %}
+<table class="table table-striped">
+    <tr>
+        <th>ID</th>
+        <th>Item</th>
+        <th>Order Date</th>
+    </tr>
+    {% for result in results %}
+    <tr>
+        <td>{{ result.id }}</td>
+        <td>{{ result.item }}</td>
+        <td>{{ result.order_date }}</td>
+    </tr>
+    {% endfor %}
+</table>
+{% endif %}
+{% endblock %}

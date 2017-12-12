@@ -23,8 +23,14 @@ class User(db.Model, UserMixin):
     roles = db.relationship('Role', secondary=roles_users,
                             backref=db.backref('users', lazy='dynamic'))
 
+
 class SuperSecureData(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     credit_card_number = db.Column(db.String(255), unique=True)
     ssn = db.Column(db.String(255), unique=True)
 
+
+class Order(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    item = db.Column(db.String(255))
+    order_date = db.Column(db.DateTime())

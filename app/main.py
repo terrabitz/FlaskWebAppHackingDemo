@@ -2,6 +2,7 @@ from flask import Flask, session, request, render_template, g, redirect, url_for
 from flask_security import Security, current_user, SQLAlchemyUserDatastore
 from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
+from sqlalchemy.exc import OperationalError
 
 from app.models import db, User, Role, SuperSecureData
 
@@ -101,14 +102,38 @@ def shop():
             quantity=int(quantity)
         )
 
-@app.route('/sqli', methods=['GET', 'POST'])
+
+@app.route('/shipping_order', methods=['GET', 'POST'])
 def sqli():
-    pass
+    results = []
+    error = ''
+    order_id = request.form.get('order_id')
+    if request.method == 'POST' and order_id:
+        connection = db.engine.connect()
+        try:
+            rows = connection.execute('select * from orders where id = \'{}\''.format(order_id))
+        except OperationalError:
+            error = 'Could not find order {}'.format(order_id)
+        else:
+            for row in rows:
+                order = {}
+                for key, value in row.items():
+                    order[key] = value
+                results.append(order)
+
+    return render_template(
+        'shipping_order.html',
+        page_title='Shipping Order Lookup',
+        page_description='This is to demonstrate basic SQL injection attacks',
+        results=results,
+        error=error
+    )
 
 
 demo_pages = {
     'Spidering': '/spider/1',
-    'Shop': '/shop'
+    'Shop': '/shop',
+    'SQL': '/shipping_order'
 }
 
 
