@@ -1,17 +1,20 @@
 from flask import Flask, session, request, render_template, g, redirect, url_for, abort
-from flask_security import Security, current_user
+from flask_security import Security, current_user, SQLAlchemyUserDatastore
 from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
 
-from .models import db, user_datastore, User, Role
+from app.models import db, User, Role, SuperSecureData
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'Keep it secret, keep it safe'
+app.config['SECURITY_PASSWORD_SALT'] = 'asdfasdfasdfasdfasdf'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/test.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 app.config['EXPLAIN_TEMPLATE_LOADING'] = True
 app.config['DEBUG'] = True
 db.init_app(app)
+
+user_datastore = SQLAlchemyUserDatastore(db, User, Role)
 
 
 def add_jinja_functions(app):
@@ -19,7 +22,8 @@ def add_jinja_functions(app):
     app.jinja_env.globals.update(
         hasattr=hasattr,
         enumerate=enumerate,
-        len=len
+        len=len,
+        str=str
     )
 
 
@@ -51,12 +55,21 @@ def init_admin_extension(app):
     admin = Admin(app, name='Web App Demo', template_mode='bootstrap3')
     admin.add_view(SecurityModelView(User, db.session))
     admin.add_view(SecurityModelView(Role, db.session))
+    admin.add_view(SecurityModelView(SuperSecureData, db.session))
 
 
 def init_security_extension_db(app):
     security = Security(app, user_datastore)
-    user_datastore.create_role(name='superuser')
-    user_datastore.create_role(name='user')
+    with app.app_context():
+        user_datastore.create_role(name='superuser')
+        user_datastore.create_role(name='user')
+
+
+@app.before_first_request
+def initial_setup():
+    init_security_extension_db(app)
+    add_jinja_functions(app)
+    init_admin_extension(app)
 
 
 @app.before_request
@@ -66,8 +79,36 @@ def before_request():
     g.path = request.path
 
 
-demo_pages = {
+@app.route('/spider/<int:id>')
+def spider(id):
+    return render_template('spider.html', id=id, page_title='Page ' + str(id),
+                           page_description='This page is to help demonstrate spidering')
 
+
+@app.route('/shop', methods=['GET', 'POST'])
+def shop():
+    if request.method == 'GET':
+        return render_template('shop.html', page_title='Shop',
+                               page_description='This is to showcase client-side bypass techniques')
+    elif request.method == 'POST':
+        quantity = request.form.get('quantity')
+        cost = request.form.get('cost')
+        return render_template(
+            'order.html',
+            page_title='Order Confirmed',
+            page_description='This is to showcase client-side bypass technique',
+            cost=float(cost),
+            quantity=int(quantity)
+        )
+
+@app.route('/sqli', methods=['GET', 'POST'])
+def sqli():
+    pass
+
+
+demo_pages = {
+    'Spidering': '/spider/1',
+    'Shop': '/shop'
 }
 
 
@@ -75,10 +116,6 @@ demo_pages = {
 def index():
     return render_template('index.html', pages=demo_pages)
 
-
-add_jinja_functions(app)
-init_admin_extension(app)
-init_security_extension_db(app)
 
 if __name__ == '__main__':
     app.run()
