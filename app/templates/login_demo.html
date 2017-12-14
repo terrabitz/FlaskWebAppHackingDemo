@@ -9,7 +9,7 @@
 {% endif %}
 {% if username %}
 <h1>Welcome {{ username }}</h1>
-<a href={{ url_for('.login_demo_logout') }}><button>Logout</button></a>
+<a href={{ logout_location }}><button>Logout</button></a>
 {% else %}
 {{ form(method="POST", fields=[
 input(name="username", label="Username", placeholder="username"),

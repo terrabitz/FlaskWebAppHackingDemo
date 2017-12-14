@@ -22,5 +22,5 @@ class WebAppCli:
 
 if __name__ == '__main__':
     web_app_cli = WebAppCli()
-    #web_app_cli.session_demo_create_user('test')
+    web_app_cli.session_demo_create_user('admin')
     web_app_cli.create_rand_users(20)

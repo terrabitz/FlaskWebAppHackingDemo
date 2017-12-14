@@ -1,10 +1,10 @@
 import random
+import base64
 
 from flask import Flask, session, request, render_template, g, redirect, url_for, abort, make_response
 from flask_security import Security, current_user, SQLAlchemyUserDatastore
 from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
-from sqlalchemy import desc
 
 from app.models import db, User, Role, SuperSecureData, Orders, SessionDemo
 
@@ -167,7 +167,8 @@ def login_demo():
         page_title=page_title,
         page_description=page_description,
         username=username,
-        error=error
+        error=error,
+        logout_location='/login_demo/logout'
     ))
 
     if cookies_to_set:
@@ -193,12 +194,59 @@ def login_demo_logout():
 
     return response
 
+@app.route('/login_demo2', methods=['GET', 'POST'])
+def login_demo2():
+    page_title = 'Login Page 2'
+    page_description = 'This is page to demonstrate weak session cookies with meaning'
+    session_id = request.cookies.get('session_demo2')
+    username = ''
+    cookies_to_set = {}
+    error = ''
+    if session_id:
+        username = base64.b64decode(session_id).decode()
+
+    elif request.method == 'POST':
+        username = request.form.get('username')
+        if not username:
+            error = 'Please enter a valid user'
+        else:
+            session_id_to_set = base64.b64encode(username.encode()).decode()
+            print(session_id_to_set)
+            cookies_to_set['session_demo2'] = session_id_to_set
+
+    response = make_response(render_template(
+        'login_demo.html',
+        page_title=page_title,
+        page_description=page_description,
+        username=username,
+        error=error,
+        logout_location='/login_demo2/logout'
+    ))
+
+    if cookies_to_set:
+        for key, value in cookies_to_set.items():
+            key = str(key).encode()
+            value = str(value).encode()
+            response.set_cookie(key, value)
+    return response
+
+@app.route('/login_demo2/logout', methods=['GET'])
+def login_demo_logout2():
+    session_id = request.cookies.get('session_demo2')
+    response = make_response(
+        redirect(url_for('login_demo2'))
+    )
+    if session_id:
+        response.set_cookie('session_demo2', '', expires=0)
+
+    return response
 
 demo_pages = {
     'Spidering': '/spider/1',
     'Shop': '/shop',
     'Shipping Order': '/shipping_order',
-    'Login': '/login_demo'
+    'Login': '/login_demo',
+    'Login2': '/login_demo2'
 }
 
 
