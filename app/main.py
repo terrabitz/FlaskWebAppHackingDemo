@@ -1,10 +1,12 @@
-from flask import Flask, session, request, render_template, g, redirect, url_for, abort
+import random
+
+from flask import Flask, session, request, render_template, g, redirect, url_for, abort, make_response
 from flask_security import Security, current_user, SQLAlchemyUserDatastore
 from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
-from sqlalchemy.exc import OperationalError
+from sqlalchemy import desc
 
-from app.models import db, User, Role, SuperSecureData, Orders
+from app.models import db, User, Role, SuperSecureData, Orders, SessionDemo
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'Keep it secret, keep it safe'
@@ -130,10 +132,73 @@ def sqli():
     )
 
 
+
+@app.route('/login_demo', methods=['GET', 'POST'])
+def login_demo():
+    page_title = 'Login Page'
+    page_description = 'This is page to demonstrate weak session cookies'
+    session_num = request.cookies.get('session_demo')
+    username = ''
+    cookies_to_set = {}
+    error = ''
+    if session_num:
+        session_demo = SessionDemo.query.filter_by(session_num=session_num).first()
+        if not session_demo:
+            return redirect(url_for('login_demo_logout'))
+        username = session_demo.username
+
+    elif request.method == 'POST':
+        username = request.form.get('username')
+        if not username:
+            error = 'Please enter a valid user'
+        elif not SessionDemo.query.filter_by(username=username).first():
+            session_demo = SessionDemo.query.order_by(SessionDemo.session_num.desc()).first()
+            if not session_demo:
+                max_session_num = random.randint(100000000, 999999999)
+            else:
+                max_session_num = session_demo.session_num + 1
+            new_session_demo = SessionDemo(username=username, session_num=max_session_num)
+            db.session.add(new_session_demo)
+            db.session.commit()
+            cookies_to_set['session_demo'] = max_session_num
+
+    response = make_response(render_template(
+        'login_demo.html',
+        page_title=page_title,
+        page_description=page_description,
+        username=username,
+        error=error
+    ))
+
+    if cookies_to_set:
+        for key, value in cookies_to_set.items():
+            key = str(key).encode()
+            value = str(value).encode()
+            response.set_cookie(key, value)
+    return response
+
+
+@app.route('/login_demo/logout', methods=['GET'])
+def login_demo_logout():
+    session_num = request.cookies.get('session_demo')
+    response = make_response(
+        redirect(url_for('login_demo'))
+    )
+    if session_num:
+        session_demo = SessionDemo.query.filter_by(session_num=session_num).first()
+        if session_demo:
+            db.session.delete(session_demo)
+            db.session.commit()
+        response.set_cookie('session_demo', '', expires=0)
+
+    return response
+
+
 demo_pages = {
     'Spidering': '/spider/1',
     'Shop': '/shop',
-    'SQL': '/shipping_order'
+    'Shipping Order': '/shipping_order',
+    'Login': '/login_demo'
 }
 
 

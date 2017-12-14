@@ -1,0 +1,21 @@
+{% extends '_page.html' %}
+{% from 'components/forms.html' import input, button, form %}
+
+{% block page_body %}
+{% if error %}
+<div class="alert alert-danger" role="alert">
+    {{ error }}
+</div>
+{% endif %}
+{% if username %}
+<h1>Welcome {{ username }}</h1>
+<a href={{ url_for('.login_demo_logout') }}><button>Logout</button></a>
+{% else %}
+{{ form(method="POST", fields=[
+input(name="username", label="Username", placeholder="username"),
+input(name="password", label="Password", placeholder="password", type="password"),
+button(text="Submit", type="submit", style_class="btn-primary")
+])
+}}
+{% endif %}
+{% endblock %}
