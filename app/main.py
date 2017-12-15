@@ -1,12 +1,13 @@
 import random
 import base64
+from collections import OrderedDict
 
 from flask import Flask, session, request, render_template, g, redirect, url_for, abort, make_response
 from flask_security import Security, current_user, SQLAlchemyUserDatastore
 from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
 
-from app.models import db, User, Role, SuperSecureData, Orders, SessionDemo
+from app.models import db, User, Role, SuperSecureData, Orders, SessionDemo, Messages
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'Keep it secret, keep it safe'
@@ -132,7 +133,6 @@ def sqli():
     )
 
 
-
 @app.route('/login_demo', methods=['GET', 'POST'])
 def login_demo():
     page_title = 'Login Page'
@@ -194,6 +194,7 @@ def login_demo_logout():
 
     return response
 
+
 @app.route('/login_demo2', methods=['GET', 'POST'])
 def login_demo2():
     page_title = 'Login Page 2'
@@ -230,6 +231,7 @@ def login_demo2():
             response.set_cookie(key, value)
     return response
 
+
 @app.route('/login_demo2/logout', methods=['GET'])
 def login_demo_logout2():
     session_id = request.cookies.get('session_demo2')
@@ -241,13 +243,49 @@ def login_demo_logout2():
 
     return response
 
-demo_pages = {
-    'Spidering': '/spider/1',
-    'Shop': '/shop',
-    'Shipping Order': '/shipping_order',
-    'Login': '/login_demo',
-    'Login2': '/login_demo2'
-}
+
+@app.route('/messages', methods=['GET', 'POST'])
+def messages():
+    try:
+        current_username = current_user.email
+    except AttributeError:
+        current_username = 'Anonymous'
+
+    if request.method == 'POST':
+        to_username = request.form.get('to_username')
+        from_username = current_username
+        message = request.form.get('message')
+
+        new_message = Messages(to_username=to_username, from_username=from_username, message=message)
+        db.session.add(new_message)
+        db.session.commit()
+
+    message_query_results = Messages.query.filter_by(to_username=current_username)
+    messages = []
+    for message_row in message_query_results:
+        # Add dict to list for each message
+        messages.append({
+            'to_username': message_row.to_username,
+            'from_username': message_row.from_username,
+            'message': message_row.message
+        })
+
+    return render_template(
+        'messages.html',
+        page_title='Messages',
+        page_description='This is to demonstrate basic XSS',
+        messages=messages
+    )
+
+
+demo_pages = OrderedDict()
+demo_pages['Spidering'] = '/spider/1'
+demo_pages['Shop'] = '/shop'
+demo_pages['Shipping Order'] = '/shipping_order'
+demo_pages['Login'] = '/login_demo'
+demo_pages['Login2'] = '/login_demo2'
+demo_pages['Messages'] = '/messages'
+
 
 
 @app.route('/')

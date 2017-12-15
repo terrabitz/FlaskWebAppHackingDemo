@@ -1,0 +1,24 @@
+{% extends "_page.html" %}
+{% from "components/forms.html" import form, textarea, input, button %}
+
+{% block page_body %}
+{{ form(method="POST", fields=[
+input(name="to_username", label="Please enter the username to send the message to", placeholder="username"),
+textarea(name="message"),
+button(text="Submit", type="submit", style_class="btn-primary")
+])
+}}
+
+<table class="table table-striped">
+    <tr>
+        <th>From</th>
+        <th>Message</th>
+    </tr>
+    {% for message in messages %}
+    <tr>
+        <td>{{ message['from_username'] | safe }}</td>
+        <td>{{ message['message'] | safe }}</td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}

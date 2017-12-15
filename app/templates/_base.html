@@ -28,11 +28,27 @@
         <a class="navbar-brand" href="{{ url_for('index') }}">
             Web App Demo</a>
         <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="nav navbar-nav">
+                {% if g.user.is_authenticated %}
+                <li>
+                    <a href="{{ url_for('security.logout') }}">
+                    <button class="btn btn-primary navbar-btn">Logout</button>
+                    </a>
+                </li>
+                {% else %}
+                <li>
+                    <a href="{{ url_for('security.login') }}">
+                    <button class="btn btn-primary navbar-btn">Login</button>
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
         </div>
     </div>
 </nav>
 {% block body %}
 {% endblock %}
-<script src={{ url_for("static", filename="test.js") }}></script>
+<script src={{ url_for(
+"static", filename="test.js") }}></script>
 </body>
 </html>

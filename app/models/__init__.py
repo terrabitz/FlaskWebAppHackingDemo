@@ -15,6 +15,9 @@ class Role(db.Model, RoleMixin):
     name = db.Column(db.String(80), unique=True)
     description = db.Column(db.String(255))
 
+    def __repr__(self):
+        return '<Role {}>'.format(self.name)
+
 
 class User(db.Model, UserMixin):
     __tablename__ = 'user'
@@ -27,6 +30,9 @@ class User(db.Model, UserMixin):
     roles = db.relationship('Role', secondary=roles_users,
                             backref=db.backref('users', lazy='dynamic'))
     orders = db.relationship('Orders', backref=db.backref('orders'))
+
+    def __repr__(self):
+        return '<User {}>'.format(self.email)
 
 
 class SuperSecureData(db.Model):
@@ -57,3 +63,10 @@ class SessionDemo(db.Model):
         return '<Session {} for user {}>'.format(self.session_num, self.username)
 
 
+class Messages(db.Model):
+    __tablename__ = 'messages'
+
+    id = db.Column(db.Integer, primary_key=True)
+    to_username = db.Column(db.String(255))
+    from_username = db.Column(db.String(255))
+    message = db.Column(db.String(5000))
